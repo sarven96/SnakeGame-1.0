@@ -13,21 +13,22 @@ background_color = (173, 231, 146)
 width = 1000
 height = 1000
 
-# Creates the able object
-
 
 class Apple:
+    # Creates the apple object
     def __init__(self, parent_screen):
         self.parent_screen = parent_screen
         self.image = pygame.image.load("assets/apple.jpg").convert()
         self.cordinate_x = 120
         self.cordinate_y = 120
-
+    
+    # draw the apple in the game window
     def draw(self):
         self.parent_screen.blit(
             self.image, (self.cordinate_x, self.cordinate_y))
         pygame.display.flip()
-
+    
+    # randomly moves the apple
     def move(self):
         self.cordinate_x = random.randint(0, 23) * size
         self.cordinate_y = random.randint(0, 23) * size
@@ -35,7 +36,6 @@ class Apple:
 
 class Snake:
     # Create snake and move controls
-
     def __init__(self, parent_screen, length):
         self.parent_screen = parent_screen
         self.image = pygame.image.load("assets/block.jpg").convert()
@@ -45,6 +45,7 @@ class Snake:
         self.cordinate_x = [40] * length
         self.cordinate_y = [40] * length
 
+    # snake move direction, and avoid reverse direction
     def move_left(self):
         if not self.direction == "right":
             self.direction = "left"
@@ -61,8 +62,8 @@ class Snake:
         if not self.direction == "up":
             self.direction = "down"
 
+    # the snake moves automatically when key is pressed
     def walk(self):
-
         for i in range(self.length - 1, 0, -1):
             self.cordinate_x[i] = self.cordinate_x[i - 1]
             self.cordinate_y[i] = self.cordinate_y[i - 1]
@@ -80,15 +81,15 @@ class Snake:
             self.cordinate_y[0] += size
 
         self.draw()
-
+    
+    # draw the snake
     def draw(self):
-        # self.parent_screen.fill(background_color)
-
         for i in range(self.length):
             self.parent_screen.blit(
                 self.image, (self.cordinate_x[i], self.cordinate_y[i]))
         pygame.display.flip()
-
+    
+    # increase snake length when eats apple
     def increase_length(self):
         self.length += 1
         self.cordinate_x.append(-1)
@@ -98,13 +99,14 @@ class Snake:
 class Game:
     # Opens the game window and keep it running until we choose to close
     # Allows in controling snake using the class Snake
+    # Allows sound effects to be running
 
     def __init__(self):
-        # automatically initialize the whole module
+        # automatically initialize the whole module - basically the lifecycle
         pygame.init()
         pygame.display.set_caption("Snake Game")
-
         pygame.mixer.init()
+
         self.background_music()
 
         self.surface = pygame.display.set_mode((width, height))
@@ -122,11 +124,13 @@ class Game:
     def sound_effect(self, sound):
         sound = pygame.mixer.Sound(f"assets/{sound}.mp3")
         pygame.mixer.Sound.play(sound)
-
+    
+    #reset the game, snake length after lose
     def reset(self):
         self.snake = Snake(self.surface, 2)
         self.apple = Apple(self.surface)
-
+    
+    #object collision logic
     def is_collision(self, cordinate_x1, cordinate_y1, cordinate_x2, cordinate_y2):
         if cordinate_x1 >= cordinate_x2 and cordinate_x1 < cordinate_x2 + size:
             if cordinate_y1 >= cordinate_y2 and cordinate_y1 < cordinate_y2 + size:
@@ -140,7 +144,8 @@ class Game:
     def render_background(self):
         bg = pygame.image.load("assets/background.jpg")
         self.surface.blit(bg, (0, 0))
-
+    
+    # gameplay logic
     def play(self):
         self.render_background()
         self.snake.walk()
@@ -166,15 +171,18 @@ class Game:
                 self.sound_effect("1_snake_game_resources_crash")
                 raise "Collision Occured"
 
+        # snake colliding the walls
         if self.is_collision(self.snake.cordinate_x[0], self.snake.cordinate_y[0], width, height):
             raise "Collision Occured"
 
+    # score display
     def display_score(self):
         font = pygame.font.SysFont('arial', 30)
         score = font.render(
             f"Score: {self.snake.length - 2}", True, (255, 255, 255))
         self.surface.blit(score, (850, 10))
 
+    # game over dialogues and logics
     def game_over(self):
 
         self.render_background()
@@ -188,6 +196,7 @@ class Game:
 
         pygame.display.flip()
 
+    # game running lifecycle logic
     def run(self):
         running = True
         pause = False
@@ -217,7 +226,8 @@ class Game:
 
                 elif event.type == QUIT:
                     running = False
-
+            
+            # pause game over dialogue box logic
             try:
                 if not pause:
                     self.play()
@@ -233,3 +243,4 @@ class Game:
 if __name__ == "__main__":
     game = Game()
     game.run()
+
